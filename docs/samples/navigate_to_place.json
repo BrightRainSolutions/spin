@@ -1,0 +1,143 @@
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Navigating to: Bean Cycle Roasters (Coffee Shop)\nDistance: 254m, east (254m)\nAddress: 326 Walnut St\nWalking time: ~5 min\nStart by: around\n\nDirections:\n  1. Head south (38m) — pass Idylwild Therapy (left), Om Ananda Yoga (right)\n  2. Continue on the crosswalk and continue for 6 meters. (7m)\n  3. Turn left onto West Mountain Avenue and continue for 264 meters. (265m) — pass Tula Designer Boutique (left), Tula Boutique (left)\n  4. Turn left onto Walnut Street and continue for 74 meters. (74m)\n  5. Turn right and continue for 25 meters. (25m)\n  6. Your destination is on the left (0m) — pass Bean Cycle Roasters (left), Makerfolk (left)\n\nStreet crossings (6):\n  - West Mountain Avenue at 45m\n  - North College Avenue at 60m\n  - North College Avenue at 80m\n  - East Mountain Avenue at 146m\n  - Remington Street at 218m\n  - Walnut Street at 478m\n\nNavigation tips for Bean Cycle Roasters: {\"venue_type\": \"office\"}"
+      }
+    ],
+    "structuredContent": {
+      "destination": {
+        "name": "Bean Cycle Roasters",
+        "category": "Coffee Shop",
+        "distance_m": 254,
+        "direction": "east (254m)",
+        "address": "326 Walnut St",
+        "latitude": 40.58776807,
+        "longitude": -105.07452503,
+        "walking_minutes": 5
+      },
+      "steps": [
+        {
+          "instruction": "Head south",
+          "distance_m": 38,
+          "places_along": [
+            {
+              "name": "Idylwild Therapy",
+              "side": "left"
+            },
+            {
+              "name": "Om Ananda Yoga",
+              "side": "right"
+            }
+          ]
+        },
+        {
+          "instruction": "Continue on the crosswalk and continue for 6 meters.",
+          "distance_m": 7,
+          "places_along": []
+        },
+        {
+          "instruction": "Turn left onto West Mountain Avenue and continue for 264 meters.",
+          "distance_m": 265,
+          "places_along": [
+            {
+              "name": "Tula Designer Boutique",
+              "side": "left"
+            },
+            {
+              "name": "Tula Boutique",
+              "side": "left"
+            }
+          ]
+        },
+        {
+          "instruction": "Turn left onto Walnut Street and continue for 74 meters.",
+          "distance_m": 74,
+          "places_along": []
+        },
+        {
+          "instruction": "Turn right and continue for 25 meters.",
+          "distance_m": 25,
+          "places_along": []
+        },
+        {
+          "instruction": "Your destination is on the left",
+          "distance_m": 0,
+          "places_along": [
+            {
+              "name": "Bean Cycle Roasters",
+              "side": "left"
+            },
+            {
+              "name": "Makerfolk",
+              "side": "left"
+            }
+          ]
+        }
+      ],
+      "street_crossings": [
+        {
+          "name": "West Mountain Avenue",
+          "distance_m": 45
+        },
+        {
+          "name": "North College Avenue",
+          "distance_m": 60
+        },
+        {
+          "name": "North College Avenue",
+          "distance_m": 80
+        },
+        {
+          "name": "East Mountain Avenue",
+          "distance_m": 146
+        },
+        {
+          "name": "Remington Street",
+          "distance_m": 218
+        },
+        {
+          "name": "Walnut Street",
+          "distance_m": 478
+        }
+      ],
+      "route_geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -105.077248,
+            40.587499
+          ],
+          [
+            -105.077251,
+            40.587154
+          ],
+          [
+            -105.07725,
+            40.587093
+          ],
+          [
+            -105.074117,
+            40.587074
+          ],
+          [
+            -105.074187,
+            40.587235
+          ],
+          [
+            -105.074676,
+            40.587564
+          ],
+          [
+            -105.074475,
+            40.587734
+          ]
+        ]
+      }
+    },
+    "isError": false
+  }
+}

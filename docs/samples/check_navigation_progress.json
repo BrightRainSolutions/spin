@@ -1,0 +1,130 @@
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Status: regressed\nYou have gone 40m in the wrong direction from the route start.\nDestination: Bean Cycle Roasters — 193m, east (193m)\nRemaining walk: ~3 min\nNext: straight ahead\n\nUpdated directions:\n  1. Head north (13m) — pass Town Pump (right)\n  2. Turn right onto Trimble Court and continue for 52 meters. (52m) — pass Grey Rock Realty (right), Trimble Court Artisans (left)\n  3. Turn left onto Whitton Court Alley and continue for 93 meters. (93m) — pass Entwine Therapy (right), The Law Office of Nathan P. Hansen (right)\n  4. Turn right onto Walnut Street and continue for 164 meters. (164m) — pass Hearne's Footwear and Clothing (right), Explorado Market (right)\n  5. Turn left and continue for 25 meters. (25m)\n  6. Your destination is on the left (0m) — pass Bean Cycle Roasters (left), Makerfolk (left)"
+      }
+    ],
+    "structuredContent": {
+      "status": "regressed",
+      "destination": {
+        "name": "Bean Cycle Roasters",
+        "distance_m": 193,
+        "direction": "east (193m)",
+        "latitude": 40.58776807,
+        "longitude": -105.07452503,
+        "walking_minutes": 3
+      },
+      "steps": [
+        {
+          "instruction": "Head north",
+          "distance_m": 13,
+          "places_along": [
+            {
+              "name": "Town Pump",
+              "side": "right"
+            }
+          ]
+        },
+        {
+          "instruction": "Turn right onto Trimble Court and continue for 52 meters.",
+          "distance_m": 52,
+          "places_along": [
+            {
+              "name": "Grey Rock Realty",
+              "side": "right"
+            },
+            {
+              "name": "Trimble Court Artisans",
+              "side": "left"
+            }
+          ]
+        },
+        {
+          "instruction": "Turn left onto Whitton Court Alley and continue for 93 meters.",
+          "distance_m": 93,
+          "places_along": [
+            {
+              "name": "Entwine Therapy",
+              "side": "right"
+            },
+            {
+              "name": "The Law Office of Nathan P. Hansen",
+              "side": "right"
+            }
+          ]
+        },
+        {
+          "instruction": "Turn right onto Walnut Street and continue for 164 meters.",
+          "distance_m": 164,
+          "places_along": [
+            {
+              "name": "Hearne's Footwear and Clothing",
+              "side": "right"
+            },
+            {
+              "name": "Explorado Market",
+              "side": "right"
+            }
+          ]
+        },
+        {
+          "instruction": "Turn left and continue for 25 meters.",
+          "distance_m": 25,
+          "places_along": []
+        },
+        {
+          "instruction": "Your destination is on the left",
+          "distance_m": 0,
+          "places_along": [
+            {
+              "name": "Bean Cycle Roasters",
+              "side": "left"
+            },
+            {
+              "name": "Makerfolk",
+              "side": "left"
+            }
+          ]
+        }
+      ],
+      "route_geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -105.076821,
+            40.5876
+          ],
+          [
+            -105.076818,
+            40.58772
+          ],
+          [
+            -105.076201,
+            40.587712
+          ],
+          [
+            -105.076193,
+            40.588426
+          ],
+          [
+            -105.076131,
+            40.588542
+          ],
+          [
+            -105.074676,
+            40.587564
+          ],
+          [
+            -105.074475,
+            40.587734
+          ]
+        ]
+      }
+    },
+    "isError": false
+  }
+}

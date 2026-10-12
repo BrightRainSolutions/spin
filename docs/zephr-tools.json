@@ -1,0 +1,349 @@
+{
+  "endpoint": "https://api.zephr.xyz/mcp/",
+  "fetchedAt": "2026-10-12T23:36:26.604Z",
+  "sessionIdReturned": false,
+  "serverInfo": {
+    "name": "zephr-grounding-mcp",
+    "version": "3.2.4"
+  },
+  "protocolVersion": "2025-06-18",
+  "capabilities": {
+    "experimental": {},
+    "logging": {},
+    "prompts": {
+      "listChanged": true
+    },
+    "resources": {
+      "subscribe": false,
+      "listChanged": true
+    },
+    "tools": {
+      "listChanged": true
+    },
+    "extensions": {
+      "io.modelcontextprotocol/ui": {}
+    }
+  },
+  "instructions": "Spatial tools for exploring the real world. These tools require you to supply the user's current latitude and longitude. You must get these from somewhere else, such as another tool call.",
+  "tools": [
+    {
+      "name": "find_nearest_to_me",
+      "title": "Find Nearest Places",
+      "description": "Find the nearest places matching a query or name near the given coordinates.\n\nResults include distance and cardinal direction (e.g., \"150m northeast\").\n\nUse this tool when the user asks things like:\n- \"Where is the nearest coffee shop?\"\n- \"How far away is Starbucks?\"\n- \"Find me a pharmacy\"\n- \"Is there a Walmart near me?\"\n- \"Where can I get pizza?\"\n- \"What's that place with the purple sign on the corner?\"\n- \"I see a place with orange outdoor umbrellas, what is it?\"",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "User's current latitude in decimal degrees"
+          },
+          "lng": {
+            "type": "number",
+            "description": "User's current longitude in decimal degrees"
+          },
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "What to search for by category or description (e.g., \"coffee shop\", \"pharmacy\", \"purple building\"). Use for general searches."
+          },
+          "heading": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional compass heading in degrees (0=north, 90=east). When provided, directions are relative (e.g., \"ahead\", \"to your left\")."
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The specific name of a place to find (e.g., \"Starbucks\", \"Target\"). When provided, semantic match is weighted 90% and distance 10%."
+          }
+        },
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "title": "Find Nearest Places",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      }
+    },
+    {
+      "name": "get_location",
+      "title": "Get Location Info",
+      "description": "Get information about a location: the street it's on and nearby places.\n\nUse this tool when the user asks things like:\n- \"Where am I?\"\n- \"What street am I on?\"\n- \"What places am I near?\"\n- \"What's around me?\"",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "User's current latitude in decimal degrees"
+          },
+          "lng": {
+            "type": "number",
+            "description": "User's current longitude in decimal degrees"
+          },
+          "heading": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional compass heading in degrees (0=north, 90=east). When provided, directions are relative (e.g., \"ahead\", \"to your left\")."
+          }
+        },
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "title": "Get Location Info",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      }
+    },
+    {
+      "name": "get_place_details",
+      "title": "Get Place Details",
+      "description": "Get details for a single place: contact info, address, brand, and visual/entrance descriptions.\n\nUse this tool when the user asks things like:\n- \"What's the phone number of that pizza place?\"\n- \"Does Sweet Cow have a website?\"\n- \"Tell me more about that place\"\n- \"What's the address of the pharmacy you found?\"",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "overture_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Exact Overture ID of the place, as returned by find_nearest_to_me.\n         Preferred when available — it's an exact lookup with no ambiguity\n         and works without lat/lng. Copy the ID exactly; never guess one."
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The name of the place to look up (e.g., \"Starbucks\"). Used when no\n  overture_id is known. Resolved by semantic match (90%) and distance (10%),\n  so lat and lng are required with name."
+          },
+          "lat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "User's current latitude in decimal degrees. Required with name; optional\n with overture_id (when provided, distance and direction are included)."
+          },
+          "lng": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "User's current longitude in decimal degrees. Required with name; optional\n with overture_id (when provided, distance and direction are included)."
+          },
+          "heading": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional compass heading in degrees (0=north, 90=east). When provided,\n     direction is relative (e.g., \"to your left\")."
+          }
+        },
+        "type": "object"
+      },
+      "annotations": {
+        "title": "Get Place Details",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      }
+    },
+    {
+      "name": "navigate_to_place",
+      "title": "Navigate to Place",
+      "description": "Get walking directions from the given coordinates to a place matching the query or name.\n\nThe first direction step uses a cardinal heading (e.g., \"Head east on Pearl St\").\nSubsequent steps use left/right relative to direction of travel.\n\nUse this tool when the user asks things like:\n- \"How do I get to Starbucks?\"\n- \"Navigate me to the nearest pharmacy\"\n- \"Give me directions to the park\"",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "User's current latitude in decimal degrees"
+          },
+          "lng": {
+            "type": "number",
+            "description": "User's current longitude in decimal degrees"
+          },
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Where to navigate to by category or description (e.g., \"nearest pharmacy\", \"the park\"). Use for general destinations."
+          },
+          "heading": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional compass heading in degrees (0=north, 90=east). When provided, the first step uses relative direction instead of cardinal."
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The specific name of the place to navigate to (e.g., \"Starbucks\", \"MOMA\"). When provided, semantic match is weighted 90% and distance 10%."
+          }
+        },
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "title": "Navigate to Place",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      }
+    },
+    {
+      "name": "check_navigation_progress",
+      "title": "Check Navigation Progress",
+      "description": "Check progress toward the destination set by a prior navigate_to_place call.\n\nRequires that navigate_to_place was previously called in this session.  This tool is stateful and remembers\nwhich place you have previously asked to navigate to. It checks your current position against that destination\nand provides an update on your progress, such as whether you're on the right track.\nProvides on-track / off-route / arrived / regressed status plus fresh directions.\n\nUse this tool when the user asks things like:\n- \"Am I going the right way?\"\n- \"How much further?\"\n- \"Am I close?\"\n- \"What's my progress?\"",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "User's current latitude in decimal degrees"
+          },
+          "lng": {
+            "type": "number",
+            "description": "User's current longitude in decimal degrees"
+          },
+          "heading": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional compass heading in degrees (0=north, 90=east). When provided, directions are relative (e.g., \"turn left\")."
+          }
+        },
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "title": "Check Navigation Progress",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Nearest places matching 'coffee':\n\n- Starry Night Espresso Cafe (Coffee Shop): 116m, southeast (116m). 112 S College Ave\n  Website: http://starrynightespressocafe.com/\n  Facebook: https://www.facebook.com/130139733697847\n- Bean Cycle Roasters (Coffee Shop): 254m, east (254m). 326 Walnut St\n  Website: http://beancycleroasters.com/\n  Facebook: https://www.facebook.com/60268504665\n- Lima Coffee Roasters (Coffee Shop): 439m, south (439m). 302 S College Ave\n  Website: https://www.limacoffeeroasters.com\n  Facebook: https://www.facebook.com/316670318195022\n- Dazbog Coffee (Coffee Shop): 558m, north (558m). 401 Mason Ct\n  Website: http://www.dazbog.com\n  Facebook: https://www.facebook.com/138271322887542\n- Harbinger Coffee (Coffee Shop): 704m, south (704m). 505 S Mason St\n  Website: http://www.harbingercoffee.com/\n  Facebook: https://www.facebook.com/104136969706299"
+      }
+    ],
+    "structuredContent": {
+      "places": [
+        {
+          "overture_id": "d7b70858-41f9-435a-a9b8-d82417f1f8a9",
+          "name": "Starry Night Espresso Cafe",
+          "category": "Coffee Shop",
+          "distance_m": 116,
+          "direction": "southeast (116m)",
+          "address": "112 S College Ave",
+          "latitude": 40.58658133,
+          "longitude": -105.07684509,
+          "website": "http://starrynightespressocafe.com/",
+          "facebook_url": "https://www.facebook.com/130139733697847",
+          "visual_description": null,
+          "entrance": null,
+          "crossings": null,
+          "amenities": null
+        },
+        {
+          "overture_id": "c094ca6b-9e5a-4a84-ac99-138300a3e797",
+          "name": "Bean Cycle Roasters",
+          "category": "Coffee Shop",
+          "distance_m": 254,
+          "direction": "east (254m)",
+          "address": "326 Walnut St",
+          "latitude": 40.58776807,
+          "longitude": -105.07452503,
+          "website": "http://beancycleroasters.com/",
+          "facebook_url": "https://www.facebook.com/60268504665",
+          "visual_description": null,
+          "entrance": null,
+          "crossings": null,
+          "amenities": null
+        },
+        {
+          "overture_id": "78379925-cce6-4447-87b8-1c09feeb83fb",
+          "name": "Lima Coffee Roasters",
+          "category": "Coffee Shop",
+          "distance_m": 439,
+          "direction": "south (439m)",
+          "address": "302 S College Ave",
+          "latitude": 40.58357768,
+          "longitude": -105.0768561,
+          "website": "https://www.limacoffeeroasters.com",
+          "facebook_url": "https://www.facebook.com/316670318195022",
+          "visual_description": null,
+          "entrance": null,
+          "crossings": null,
+          "amenities": null
+        },
+        {
+          "overture_id": "d2eb50d6-63e8-435c-a20a-7a70b7d4cb4d",
+          "name": "Dazbog Coffee",
+          "category": "Coffee Shop",
+          "distance_m": 558,
+          "direction": "north (558m)",
+          "address": "401 Mason Ct",
+          "latitude": 40.5923967,
+          "longitude": -105.0789934,
+          "website": "http://www.dazbog.com",
+          "facebook_url": "https://www.facebook.com/138271322887542",
+          "visual_description": null,
+          "entrance": null,
+          "crossings": null,
+          "amenities": null
+        },
+        {
+          "overture_id": "4873d0e0-4811-4589-bc44-f827f3c65951",
+          "name": "Harbinger Coffee",
+          "category": "Coffee Shop",
+          "distance_m": 704,
+          "direction": "south (704m)",
+          "address": "505 S Mason St",
+          "latitude": 40.5812789,
+          "longitude": -105.0790951,
+          "website": "http://www.harbingercoffee.com/",
+          "facebook_url": "https://www.facebook.com/104136969706299",
+          "visual_description": null,
+          "entrance": null,
+          "crossings": null,
+          "amenities": null
+        }
+      ]
+    },
+    "isError": false
+  }
+}

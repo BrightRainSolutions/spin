@@ -1,0 +1,46 @@
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Location: 40.587500, -105.077500\nOn street: not near any road\n\nNearest places:\n- Clothes Pony & Dandelion Toys (Toys And Games Store): 14m, southeast (14m)\n  Website: http://www.clothespony.com/\n  Facebook: https://www.facebook.com/89346621365\n- Om Ananda Yoga (Fitness Studio): 15m, east (15m)\n  Website: http://www.omanandayoga.com/\n  Facebook: https://www.facebook.com/215009038533872"
+      }
+    ],
+    "structuredContent": {
+      "coordinates": {
+        "latitude": 40.5875,
+        "longitude": -105.0775
+      },
+      "heading": null,
+      "street": null,
+      "nearby_places": [
+        {
+          "name": "Clothes Pony & Dandelion Toys",
+          "category": "Toys And Games Store",
+          "distance_m": 14,
+          "direction": "southeast (14m)",
+          "website": "http://www.clothespony.com/",
+          "facebook_url": "https://www.facebook.com/89346621365",
+          "visual_description": null,
+          "entrance": null,
+          "amenities": null
+        },
+        {
+          "name": "Om Ananda Yoga",
+          "category": "Fitness Studio",
+          "distance_m": 15,
+          "direction": "east (15m)",
+          "website": "http://www.omanandayoga.com/",
+          "facebook_url": "https://www.facebook.com/215009038533872",
+          "visual_description": null,
+          "entrance": null,
+          "amenities": null
+        }
+      ],
+      "directly_ahead": null
+    },
+    "isError": false
+  }
+}

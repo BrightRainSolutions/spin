@@ -1,0 +1,37 @@
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Dazbog Coffee (Coffee Shop)\nDistance: 558m, north (558m)\nAddress: 401 Mason Ct\nWebsite: http://www.dazbog.com\nFacebook: https://www.facebook.com/138271322887542\nPhone: +19704198800"
+      }
+    ],
+    "structuredContent": {
+      "place": {
+        "overture_id": "d2eb50d6-63e8-435c-a20a-7a70b7d4cb4d",
+        "name": "Dazbog Coffee",
+        "category": "Coffee Shop",
+        "address": "401 Mason Ct",
+        "latitude": 40.5923967,
+        "longitude": -105.0789934,
+        "website": "http://www.dazbog.com",
+        "facebook_url": "https://www.facebook.com/138271322887542",
+        "phone": "+19704198800",
+        "brand": null,
+        "distance_m": 558,
+        "direction": "north (558m)",
+        "visual_description": null,
+        "entrance": null,
+        "hours": null,
+        "cuisine": null,
+        "price_range": null,
+        "menu_url": null,
+        "rating": null,
+        "amenities_crawled_at": null
+      }
+    },
+    "isError": false
+  }
+}

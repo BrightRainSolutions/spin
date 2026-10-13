@@ -116,9 +116,10 @@ Samples: `samples/get_place_details_starbucks.json`, `samples/find_nearest_no_qu
 `samples/get_location_heading.json`, `samples/find_starbucks.json`.
 
 ### find_nearest_to_me with no query: refused, and not flagged as an error
-- Response is `isError: false`, **no `structuredContent`**, and `content[0].text` =
-  "Either query or name must be provided." **Tool-level errors can arrive as ordinary results.** The
-  app treats a result with no `structuredContent` as an error and shows the text.
+- Response is `isError: false` with `structuredContent: {places: []}`, and the reason only in
+  `content[0].text` = "Either query or name must be provided." **Tool-level errors can arrive as
+  ordinary empty results.** When a list comes back empty, the app shows Zephr's text so the reason
+  isn't hidden.
 - **Results are capped at 5** for every query tried. There is no limit/radius parameter.
 - Broad queries are matched semantically, partly against the place *name*: `"place"` returned
   "Sense of Place" and "The Place Setting Company". `"shop"`, `"restaurant"` and `"business"` each gave
@@ -152,3 +153,21 @@ Samples: `samples/get_place_details_starbucks.json`, `samples/find_nearest_no_qu
 - **Proxy:** all calls send `lng`. Session-id plumbing stays, but Zephr currently issues none.
   Navigation state is shared per API key.
 - **Brand:** show the name only. No Wikidata link.
+
+## Found while building (2026-10-12)
+
+- **Zephr appears to process one API key's requests one at a time.** Single calls are fast
+  (`get_location` ~0.3–0.5 s, `find_nearest_to_me` ~1.6–1.9 s through the proxy), but 7 calls in
+  parallel took 2–14 s each, as if queued. The category fan-out now runs **in sequence** with
+  progressive rendering, and `get_location` goes first so the fast answer appears first. The fan-out
+  is 5 queries (restaurant, cafe, shop, bar, business; "store" was mostly duplicates), roughly 8–9 s
+  for the full list.
+- **Status strings use spaces:** `check_navigation_progress` returned `"on track"`, not `on-track` as
+  the tool description says (and `regressed` earlier). The app normalizes spaces, hyphens and
+  underscores.
+- **`directly_ahead` can name places the category fan-out never returns.** Facing 225° from Old Town,
+  Zephr said "Enzio's Italian Kitchen, 43 m", which none of the 5 category queries returned (it's an
+  "Italian Restaurant", and the `restaurant` query's 5 slots went to others). So the ±30° list is a
+  sample, not everything in view. Keep showing both side by side.
+- With `heading` set, every `direction` string becomes relative prose ("to the left and slightly in
+  front of you, towards the south"), including in `find_nearest_to_me` and `get_place_details`.

@@ -1,0 +1,43 @@
+/* "What's here" panel (here.js). Portable: override the --zh-* variables in the host page. */
+.zh {
+  --_accent: var(--zh-accent, #ff4a1c);
+  --_ink: var(--zh-ink, #14110f);
+  --_muted: var(--zh-muted, #5f574f);
+  --_line: var(--zh-line, #e6ddd2);
+  --_hover: var(--zh-hover, #fff0e6);
+  --_error: var(--zh-error, #b3261e);
+  color: var(--_ink);
+}
+.zh-loading, .zh-empty { color: var(--_muted); margin: 12px 0; }
+.zh-error { color: var(--_error); font-weight: 600; margin: 12px 0; }
+.zh-street { font-size: 1.15rem; margin: 4px 0 8px; }
+.zh-ahead { margin: 0 0 8px; padding: 10px 12px; border-left: 4px solid var(--_accent); background: var(--_hover); border-radius: 0 10px 10px 0; }
+.zh-ahead span { color: var(--_muted); font-size: .9rem; }
+.zh-h { margin: 18px 0 6px; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--_muted); }
+.zh-h small { font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: 4px; }
+.zh-list { list-style: none; margin: 0; padding: 0; }
+.zh-list li + li { border-top: 1px solid var(--_line); }
+.zh-place {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 10px 4px;
+  background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.zh-place:hover, .zh-place:focus-visible { background: var(--_hover); }
+.zh-place-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.zh-place-name { font-weight: 700; font-size: 1.05rem; overflow-wrap: anywhere; }
+.zh-place-cat { color: var(--_muted); font-size: .88rem; }
+.zh-place-dist { text-align: right; font-weight: 700; white-space: nowrap; display: flex; flex-direction: column; }
+.zh-place-dist small { font-weight: 400; color: var(--_muted); font-size: .8rem; white-space: normal; max-width: 9em; }
+.zh-link { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--_accent); text-decoration: underline; cursor: pointer; }
+.zh-back {
+  min-height: 44px; padding: 0 14px; margin-bottom: 6px; border-radius: 22px; border: 2px solid var(--_ink);
+  background: none; color: var(--_ink); font: inherit; font-weight: 700; cursor: pointer;
+}
+.zh-name { font-size: 1.5rem; margin: 6px 0 2px; line-height: 1.15; }
+.zh-meta { color: var(--_muted); margin: 0 0 10px; }
+.zh-details dl { margin: 0; }
+.zh-row { display: grid; grid-template-columns: 6.5em 1fr; gap: 8px; padding: 8px 0; border-top: 1px solid var(--_line); }
+.zh-row dt { color: var(--_muted); font-size: .9rem; }
+.zh-row dd { margin: 0; overflow-wrap: anywhere; }
+.zh-row a { color: var(--_accent); font-weight: 600; }
+.zh-obj { margin: 0; font-size: .8rem; white-space: pre-wrap; }
+.zh-missing { color: var(--_muted); font-size: .85rem; margin-top: 10px; }

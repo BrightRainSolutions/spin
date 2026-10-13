@@ -327,7 +327,24 @@
     const b = new mapboxgl.LngLatBounds();
     points.forEach((p) => b.extend(p));
     if (state.pos) b.extend([state.pos.lng, state.pos.lat]);
-    map.fitBounds(b, { padding: { top: 40, bottom: Math.round(window.innerHeight * 0.45), left: 40, right: 40 }, maxZoom: 18, duration: 600 });
+    map.fitBounds(b, { padding: { top: 40, bottom: panelCover() + 30, left: 40, right: 40 }, maxZoom: 18, duration: 600 });
+  }
+
+  // Pixels of map hidden behind the open panel, taken at its CSS max-height: camera moves
+  // usually happen while the panel's content is still loading and it hasn't grown yet.
+  function panelCover() {
+    const panel = $('#panel');
+    if (!map || panel.hidden) return 0;
+    const mapH = map.getContainer().getBoundingClientRect().height;
+    const css = getComputedStyle(panel).maxHeight; // may come back as "58%" or in px
+    const maxH = css.endsWith('%') ? (mapH * parseFloat(css)) / 100 : parseFloat(css);
+    return Math.min(mapH - 80, Number.isFinite(maxH) ? maxH : mapH * 0.58);
+  }
+
+  // Put the user in the middle of the map area above the panel.
+  function centerOnUser(zoom) {
+    if (!map || !state.pos) return;
+    map.easeTo({ center: [state.pos.lng, state.pos.lat], offset: [0, -panelCover() / 2], zoom: zoom ?? Math.max(map.getZoom(), 16.5), duration: 500 });
   }
 
   // ---------- panel + modes ----------
@@ -675,6 +692,7 @@
     await compassReady;
     await whenPos();
     what.detail = null;
+    centerOnUser(16.5); // shows the whole 250 m cone above the panel
     fetchWhat();
   }
 

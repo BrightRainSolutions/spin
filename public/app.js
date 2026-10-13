@@ -138,7 +138,7 @@
   // ---------- status bar ----------
   function renderStatus() {
     const acc = $('#stat-acc');
-    if (!state.pos) acc.textContent = tracking ? 'locating…' : 'tap to locate';
+    if (!state.pos) acc.textContent = '± — m';
     else if (sim.pos) acc.textContent = 'pos sim';
     else acc.textContent = `± ${Math.round(state.pos.accuracy)} m`;
     acc.classList.toggle('stat-warn', !!state.pos && !sim.pos && state.pos.accuracy > 30);
@@ -173,7 +173,7 @@
 
   // ---------- heading ----------
   // The app only listens. On iOS, Mapbox's GeolocateControl asks for motion permission
-  // when location tracking starts from a tap; once granted, these listeners get events too.
+  // (from the first tap, see askHeadingOnFirstTap); once granted, these listeners get events too.
   const compass = {
     needsPermission: typeof window.DeviceOrientationEvent?.requestPermission === 'function',
     // Diagnostics, shown on the Log screen.
@@ -216,19 +216,18 @@
   // ---------- map ----------
   let map = null;
   let geolocate = null;
-  let tracking = false;
   let simMarker = null;
   const markers = [];
 
-  // Start Mapbox location tracking from inside a tap, so its iOS motion-permission request
-  // (and with it the heading arrow) is allowed. Taps on the locate button itself are left
-  // to Mapbox, or this would toggle tracking twice.
-  function startTracking(e) {
-    if (tracking || !geolocate || e.target.closest('.mapboxgl-ctrl-geolocate')) return;
-    tracking = geolocate.trigger();
-    renderStatus();
+  // Location starts on load, but Mapbox asks iOS for motion permission only when tracking
+  // starts, and iOS refuses that outside a tap, so the heading arrow never turns on. On the
+  // first tap, re-run Mapbox's own permission request (an internal method in v3.7.0; skipped
+  // if it ever disappears) so the arrow and the app's compass both start.
+  function askHeadingOnFirstTap() {
+    document.removeEventListener('click', askHeadingOnFirstTap, true);
+    if (typeof geolocate?._addDeviceOrientationListener === 'function') geolocate._addDeviceOrientationListener();
   }
-  document.addEventListener('click', startTracking, true);
+  if (compass.needsPermission) document.addEventListener('click', askHeadingOnFirstTap, true);
 
   async function initMap() {
     let token = null;
@@ -259,9 +258,7 @@
       map.addControl(geolocate, 'top-right');
       geolocate.on('geolocate', (e) => setPosition(e.coords.latitude, e.coords.longitude, e.coords.accuracy));
       geolocate.on('error', (e) => toast(`Location: ${e.message || 'unavailable'}`));
-      geolocate.on('trackuserlocationstart', () => (tracking = true));
-      // No trigger() on load: Mapbox asks iOS for motion permission when tracking starts,
-      // and iOS only allows that from a tap. The first tap starts it (see startTracking).
+      map.on('load', () => geolocate.trigger());
     }
     map.on('load', () => {
       map.addSource('route', { type: 'geojson', data: emptyFC() });
@@ -929,7 +926,7 @@
     copyText(JSON.stringify({
       userAgent: navigator.userAgent,
       standalone: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true,
-      compass: { tracking, counts: compass.counts, last: compass.last, heading: state.heading },
+      compass: { counts: compass.counts, last: compass.last, heading: state.heading },
       calls: log.map((e) => ({ time: e.time.toISOString(), tool: e.tool, pos: e.pos, accuracy: e.accuracy, simulated: e.simulated, ms: e.ms, proxyMs: e.zephrMs, ok: e.ok, error: e.error, raw: e.raw })),
     }, null, 2))
   );

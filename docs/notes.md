@@ -99,23 +99,56 @@ are in `samples/`.
 
 ## Wikidata brand QID
 
-**Not answerable yet: `brand` was null.** The one `get_place_details` call (Dazbog Coffee,
-`overture_id` d2eb50d6-63e8-435c-a20a-7a70b7d4cb4d, a regional chain) returned `"brand": null`, so
-there's no evidence of what a populated `brand` looks like: a plain string, or an object with
-Overture's `names` and `wikidata`. Next step: one more call on a national chain (e.g. find a Starbucks
-with `find_nearest_to_me {name: "Starbucks"}`, then `get_place_details` by `overture_id`).
-Until then, build the Wikidata "more about" link defensively: show it only if `brand` is an object
-carrying a `wikidata` value matching `^Q\d+$`.
+**Answer: no QID. `brand` is a plain string.** `get_place_details` on Starbucks, 460 S College Ave
+(`overture_id` d4ef8dbb-8220-41d6-8817-608b158a0f21) returned `"brand": "Starbucks"`, with no object
+and no `wikidata` field. Zephr flattens Overture's brand to its name, so the "more about" Wikidata
+link from bratlas **can't be built from Zephr data**. The app shows the brand name only. It does not
+guess a QID from the name. Dazbog Coffee (a regional chain) had `brand: null`.
 
-## Implications for the use cases
+Also from the Starbucks lookup: `find_nearest_to_me {name: "Starbucks"}` returned 5 Starbucks, but
+**not in distance order** (601, 1026, 2399, 1895, 2563 m), since `name` weighting is 90% semantic.
+Sort client-side by `distance_m` when showing results. The store's `website` is the generic
+store locator.
 
-- **Here:** call `get_location` for the street and nearby list. For map markers and tap-for-details,
-  also call `find_nearest_to_me` (or match `get_location` names against it). Rows from
-  `get_location` alone can be tapped via `get_place_details {name, lat, lng}`, which is a fuzzy lookup.
-- **Go:** works as specified, except "Walk there" navigates by `name`, not `overture_id` (see above).
-  Draw `route_geometry` on the map.
-- **What's that?:** use `find_nearest_to_me`, since it's the only tool that returns coordinates,
-  so the ±30° bearing filter can be computed client-side. Need to confirm a broad query works
-  (neither `query` nor `name`, or something like `query: "place"`). The cardinal-direction fallback
-  isn't needed if coordinates come back. Passing `heading` also gets relative directions and possibly
-  `directly_ahead` from `get_location`, worth comparing.
+## Follow-up calls (2026-10-12)
+
+Samples: `samples/get_place_details_starbucks.json`, `samples/find_nearest_no_query.json`,
+`samples/get_location_heading.json`, `samples/find_starbucks.json`.
+
+### find_nearest_to_me with no query: refused, and not flagged as an error
+- Response is `isError: false`, **no `structuredContent`**, and `content[0].text` =
+  "Either query or name must be provided." **Tool-level errors can arrive as ordinary results.** The
+  app treats a result with no `structuredContent` as an error and shows the text.
+- **Results are capped at 5** for every query tried. There is no limit/radius parameter.
+- Broad queries are matched semantically, partly against the place *name*: `"place"` returned
+  "Sense of Place" and "The Place Setting Company". `"shop"`, `"restaurant"` and `"business"` each gave
+  5 sensible, distinct, nearby results (35–717 m).
+- **Decision for What's that?:** fan out several category queries in parallel (restaurant, cafe, bar,
+  shop, store, business), merge by `overture_id`, and filter by bearing client-side. That's 6 calls per
+  refresh (every 25 m of movement) and yields up to 30 places with coordinates. Shown in the panel and
+  Log as separate calls.
+
+### get_location with heading: `directly_ahead` fills in
+- `heading: 90` gave `heading: {degrees: 90, cardinal: "East"}` and
+  `directly_ahead: {name, category, distance_m}` (Rocky Mountain Goldworks, 109 m). **No coordinates
+  or `overture_id`** on `directly_ahead`, and the place was not one of the `nearby_places`.
+- `nearby_places[].direction` becomes relative prose: "in front of you to the right, towards the
+  southeast". It no longer has the "(14m)" form.
+- What's that? shows Zephr's own `directly_ahead` answer at the top of the panel, next to the
+  client-side ±30° list, so the two can be compared.
+
+## Implications for the use cases (these override the spec)
+
+- **Here:** `get_location` (with heading when known) for the street, `directly_ahead` and its nearby
+  list, plus the same category fan-out as What's that? to get places with coordinates for map
+  markers. `get_location` rows open details via `get_place_details {name, lat, lng}`, a fuzzy lookup;
+  fan-out rows and markers use `overture_id`.
+- **Go:** `find_nearest_to_me {query}`, sorted by `distance_m`. "Walk there" calls `navigate_to_place`
+  by `name` (no `overture_id` param) and warns if the returned destination is more than 50 m from the
+  selected place. Draw `route_geometry`. Progress replaces the step list each call and highlights step
+  1; remaining = sum of step distances.
+- **What's that?:** category fan-out above, bearing filter ±30° client-side, plus `get_location`
+  `directly_ahead`. The cardinal-direction fallback in the spec isn't needed.
+- **Proxy:** all calls send `lng`. Session-id plumbing stays, but Zephr currently issues none.
+  Navigation state is shared per API key.
+- **Brand:** show the name only. No Wikidata link.

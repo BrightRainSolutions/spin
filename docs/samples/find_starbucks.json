@@ -1,0 +1,97 @@
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Nearest places matching 'None':\n\n- Starbucks (Coffee Shop): 601m, south (601m). 460 S College Ave\n  Website: https://www.starbucks.com/store-locator\n  Facebook: https://www.facebook.com/110843478158523\n- Starbucks (Coffee Shop): 1026m, south (1026m). 112 W Laurel St\n  Website: https://www.starbucks.ca/store-locator/store/1039140\n  Facebook: https://www.facebook.com/103828442498193\n- Starbucks (Coffee Shop): 2399m, southwest (2399m). 1335 W Elizabeth St (Elizabeth & City, Park-Fort Collins)\n- Starbucks (Coffee Shop): 1895m, southeast (1895m). 731 S Lemay Ave\n  Website: https://www.starbucks.com/store-locator/store/1018518\n  Facebook: https://www.facebook.com/1332507026863850\n- Starbucks (Coffee Shop): 2563m, south (2563m). 1708 S College Ave\n  Website: https://www.starbucks.com/store-locator/store/68122/"
+      }
+    ],
+    "structuredContent": {
+      "places": [
+        {
+          "overture_id": "d4ef8dbb-8220-41d6-8817-608b158a0f21",
+          "name": "Starbucks",
+          "category": "Coffee Shop",
+          "distance_m": 601,
+          "direction": "south (601m)",
+          "address": "460 S College Ave",
+          "latitude": 40.58217527,
+          "longitude": -105.07625749,
+          "website": "https://www.starbucks.com/store-locator",
+          "facebook_url": "https://www.facebook.com/110843478158523",
+          "visual_description": null,
+          "entrance": null,
+          "crossings": null,
+          "amenities": null
+        },
+        {
+          "overture_id": "da10dedd-1bc0-4611-a662-d225d28ef984",
+          "name": "Starbucks",
+          "category": "Coffee Shop",
+          "distance_m": 1026,
+          "direction": "south (1026m)",
+          "address": "112 W Laurel St",
+          "latitude": 40.57826652,
+          "longitude": -105.07784043,
+          "website": "https://www.starbucks.ca/store-locator/store/1039140",
+          "facebook_url": "https://www.facebook.com/103828442498193",
+          "visual_description": null,
+          "entrance": null,
+          "crossings": null,
+          "amenities": null
+        },
+        {
+          "overture_id": "7ac81dee-e782-4392-b4ea-35b0203c4934",
+          "name": "Starbucks",
+          "category": "Coffee Shop",
+          "distance_m": 2399,
+          "direction": "southwest (2399m)",
+          "address": "1335 W Elizabeth St (Elizabeth & City, Park-Fort Collins)",
+          "latitude": 40.5745368,
+          "longitude": -105.1001689,
+          "website": null,
+          "facebook_url": null,
+          "visual_description": null,
+          "entrance": null,
+          "crossings": null,
+          "amenities": null
+        },
+        {
+          "overture_id": "6525d860-fe44-46e1-ab21-a29d951f5eb4",
+          "name": "Starbucks",
+          "category": "Coffee Shop",
+          "distance_m": 1895,
+          "direction": "southeast (1895m)",
+          "address": "731 S Lemay Ave",
+          "latitude": 40.57738062,
+          "longitude": -105.05947115,
+          "website": "https://www.starbucks.com/store-locator/store/1018518",
+          "facebook_url": "https://www.facebook.com/1332507026863850",
+          "visual_description": null,
+          "entrance": null,
+          "crossings": null,
+          "amenities": null
+        },
+        {
+          "overture_id": "5e656db0-10f5-493b-bf8a-9fe2a1eb694a",
+          "name": "Starbucks",
+          "category": "Coffee Shop",
+          "distance_m": 2563,
+          "direction": "south (2563m)",
+          "address": "1708 S College Ave",
+          "latitude": 40.56442683,
+          "longitude": -105.07663665,
+          "website": "https://www.starbucks.com/store-locator/store/68122/",
+          "facebook_url": null,
+          "visual_description": null,
+          "entrance": null,
+          "crossings": null,
+          "amenities": null
+        }
+      ]
+    },
+    "isError": false
+  }
+}

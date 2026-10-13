@@ -1,0 +1,37 @@
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Starbucks (Coffee Shop)\nDistance: 601m, south (601m)\nAddress: 460 S College Ave\nWebsite: https://www.starbucks.com/store-locator\nFacebook: https://www.facebook.com/110843478158523\nPhone: +19707973969\nBrand: Starbucks"
+      }
+    ],
+    "structuredContent": {
+      "place": {
+        "overture_id": "d4ef8dbb-8220-41d6-8817-608b158a0f21",
+        "name": "Starbucks",
+        "category": "Coffee Shop",
+        "address": "460 S College Ave",
+        "latitude": 40.58217527,
+        "longitude": -105.07625749,
+        "website": "https://www.starbucks.com/store-locator",
+        "facebook_url": "https://www.facebook.com/110843478158523",
+        "phone": "+19707973969",
+        "brand": "Starbucks",
+        "distance_m": 601,
+        "direction": "south (601m)",
+        "visual_description": null,
+        "entrance": null,
+        "hours": null,
+        "cuisine": null,
+        "price_range": null,
+        "menu_url": null,
+        "rating": null,
+        "amenities_crawled_at": null
+      }
+    },
+    "isError": false
+  }
+}

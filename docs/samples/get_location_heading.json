@@ -1,0 +1,53 @@
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Location: 40.587500, -105.077500\nFacing: East (90°)\nOn street: not near any road\n\nNearest places:\n- Clothes Pony & Dandelion Toys (Toys And Games Store): 14m, in front of you to the right, towards the southeast\n  Website: http://www.clothespony.com/\n  Facebook: https://www.facebook.com/89346621365\n- Om Ananda Yoga (Fitness Studio): 15m, in front of you to the right, towards the east\n  Website: http://www.omanandayoga.com/\n  Facebook: https://www.facebook.com/215009038533872\n\nDirectly ahead: Rocky Mountain Goldworks (Fashion And Apparel Store), 109m in front of you"
+      }
+    ],
+    "structuredContent": {
+      "coordinates": {
+        "latitude": 40.5875,
+        "longitude": -105.0775
+      },
+      "heading": {
+        "degrees": 90,
+        "cardinal": "East"
+      },
+      "street": null,
+      "nearby_places": [
+        {
+          "name": "Clothes Pony & Dandelion Toys",
+          "category": "Toys And Games Store",
+          "distance_m": 14,
+          "direction": "in front of you to the right, towards the southeast",
+          "website": "http://www.clothespony.com/",
+          "facebook_url": "https://www.facebook.com/89346621365",
+          "visual_description": null,
+          "entrance": null,
+          "amenities": null
+        },
+        {
+          "name": "Om Ananda Yoga",
+          "category": "Fitness Studio",
+          "distance_m": 15,
+          "direction": "in front of you to the right, towards the east",
+          "website": "http://www.omanandayoga.com/",
+          "facebook_url": "https://www.facebook.com/215009038533872",
+          "visual_description": null,
+          "entrance": null,
+          "amenities": null
+        }
+      ],
+      "directly_ahead": {
+        "name": "Rocky Mountain Goldworks",
+        "category": "Fashion And Apparel Store",
+        "distance_m": 109
+      }
+    },
+    "isError": false
+  }
+}

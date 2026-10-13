@@ -144,7 +144,6 @@
     acc.classList.toggle('stat-warn', !!state.pos && !sim.pos && state.pos.accuracy > 30);
     $('#stat-heading').textContent = state.heading == null ? '—°' : `${Math.round(state.heading)}° ${cardinal(state.heading)}`;
     $('#badge-sim').hidden = !(sim.pos || sim.heading);
-    $('#btn-compass').hidden = compass.on || sim.heading || !compass.supported;
   }
 
   // ---------- position ----------
@@ -156,7 +155,7 @@
     if (firstFix && map) map.jumpTo({ center: [lng, lat], zoom: 17 });
     firstFix = false;
     while (posWaiters.length) posWaiters.shift()(state.pos);
-    updateSimMarker();
+    updateMeMarker();
     onMoved();
   }
   function whenPos() {
@@ -175,31 +174,58 @@
   // ---------- heading ----------
   const compass = {
     on: false,
+    pending: null,
     supported: typeof window.DeviceOrientationEvent !== 'undefined',
     needsPermission: typeof window.DeviceOrientationEvent?.requestPermission === 'function',
-    event: 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation',
+    // Diagnostics, shown on the Log screen.
+    permission: typeof window.DeviceOrientationEvent?.requestPermission === 'function' ? 'not asked' : 'not needed',
+    counts: { deviceorientation: 0, deviceorientationabsolute: 0 },
+    last: null,
   };
   function onOrientation(e) {
+    compass.counts[e.type] = (compass.counts[e.type] || 0) + 1;
+    compass.last = { type: e.type, webkitCompassHeading: e.webkitCompassHeading, webkitCompassAccuracy: e.webkitCompassAccuracy, alpha: e.alpha, absolute: e.absolute };
     if (sim.heading) return;
     let h = null;
-    if (typeof e.webkitCompassHeading === 'number') h = e.webkitCompassHeading;
-    else if (e.alpha != null) h = 360 - e.alpha;
+    // iOS: true compass heading (-1 while uncalibrated). Elsewhere: only alpha from an
+    // earth-referenced event is a compass; a relative alpha would be a made-up heading.
+    if (typeof e.webkitCompassHeading === 'number' && e.webkitCompassHeading >= 0) h = e.webkitCompassHeading;
+    else if ((e.type === 'deviceorientationabsolute' || e.absolute) && e.alpha != null) h = 360 - e.alpha;
     if (h == null || Number.isNaN(h)) return;
     setHeading(h);
   }
-  // Must be called directly from a tap on iOS (no await before it).
+  // On iOS this must run inside a tap (no await before it); a first tap anywhere calls it.
   function enableCompass() {
     if (compass.on || sim.heading || !compass.supported) return Promise.resolve(compass.on || sim.heading);
+    if (compass.pending) return compass.pending;
     const attach = () => {
-      window.addEventListener(compass.event, onOrientation);
+      window.addEventListener('deviceorientation', onOrientation);
+      if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', onOrientation);
       compass.on = true;
       renderStatus();
       return true;
     };
     if (!compass.needsPermission) return Promise.resolve(attach());
-    return DeviceOrientationEvent.requestPermission()
-      .then((r) => (r === 'granted' ? attach() : (toast('Compass permission denied'), false)))
-      .catch((err) => (toast(`Compass: ${err.message}`), false));
+    compass.pending = DeviceOrientationEvent.requestPermission()
+      .then((r) => {
+        compass.permission = r;
+        if (r === 'granted') return attach();
+        toast('Compass blocked. Close and reopen the app to be asked again.');
+        return false;
+      })
+      .catch((err) => {
+        compass.permission = `error: ${err.message}`;
+        return false;
+      })
+      .finally(() => (compass.pending = null));
+    return compass.pending;
+  }
+  function compassSummary() {
+    const c = compass.counts;
+    const l = compass.last;
+    const fmt = (v) => (typeof v === 'number' ? Math.round(v * 10) / 10 : String(v));
+    return `Compass: permission ${compass.permission} · events ${c.deviceorientation} orientation, ${c.deviceorientationabsolute} absolute` +
+      (l ? ` · last ${l.type}: compassHeading ${fmt(l.webkitCompassHeading)}, accuracy ${fmt(l.webkitCompassAccuracy)}, alpha ${fmt(l.alpha)}, absolute ${l.absolute}` : '');
   }
   let headingFrame = 0;
   function setHeading(h) {
@@ -208,14 +234,14 @@
     headingFrame = requestAnimationFrame(() => {
       headingFrame = 0;
       renderStatus();
-      updateSimMarker();
+      updateMeMarker();
       if (state.mode === 'what') onWhatHeading();
     });
   }
 
   // ---------- map ----------
   let map = null;
-  let simMarker = null;
+  let meMarker = null;
   const markers = [];
 
   async function initMap() {
@@ -239,10 +265,12 @@
       attributionControl: true,
     });
     if (!sim.pos) {
+      // showUserHeading is off: Mapbox asks iOS for motion permission when trigger() runs,
+      // which isn't a tap, so iOS refuses and its arrow never appears. We draw our own.
       const geolocate = new mapboxgl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
         trackUserLocation: true,
-        showUserHeading: true,
+        showUserHeading: false,
       });
       map.addControl(geolocate, 'top-right');
       geolocate.on('geolocate', (e) => setPosition(e.coords.latitude, e.coords.longitude, e.coords.accuracy));
@@ -256,7 +284,7 @@
       map.addSource('wedge', { type: 'geojson', data: emptyFC() });
       map.addLayer({ id: 'wedge', type: 'fill', source: 'wedge', paint: { 'fill-color': '#ff4a1c', 'fill-opacity': 0.18 } });
       map.addLayer({ id: 'wedge-edge', type: 'line', source: 'wedge', paint: { 'line-color': '#ff4a1c', 'line-width': 2, 'line-opacity': 0.7 } });
-      updateSimMarker();
+      updateMeMarker();
       if (pendingRoute) setRoute(pendingRoute);
     });
     if (sim.pos) {
@@ -271,17 +299,19 @@
   }
   const emptyFC = () => ({ type: 'FeatureCollection', features: [] });
 
-  function updateSimMarker() {
-    if (!map || !sim.pos || !state.pos) return;
-    if (!simMarker) {
+  // Our own position marker. Simulated: dot + heading arrow. Live: arrow only, drawn
+  // over Mapbox's dot and accuracy circle.
+  function updateMeMarker() {
+    if (!map || !state.pos) return;
+    if (!meMarker) {
       const el = document.createElement('div');
-      el.className = 'sim-me';
-      el.innerHTML = '<span class="sim-arrow"></span>';
-      simMarker = new mapboxgl.Marker({ element: el, rotationAlignment: 'map' }).setLngLat([state.pos.lng, state.pos.lat]).addTo(map);
+      el.className = sim.pos ? 'me me-sim' : 'me';
+      el.innerHTML = '<span class="me-arrow"></span>';
+      meMarker = new mapboxgl.Marker({ element: el, rotationAlignment: 'map' }).setLngLat([state.pos.lng, state.pos.lat]).addTo(map);
     }
-    simMarker.setLngLat([state.pos.lng, state.pos.lat]);
-    simMarker.getElement().classList.toggle('has-heading', state.heading != null);
-    simMarker.setRotation(state.heading ?? 0);
+    meMarker.setLngLat([state.pos.lng, state.pos.lat]);
+    meMarker.getElement().classList.toggle('has-heading', state.heading != null);
+    meMarker.setRotation(state.heading ?? 0);
   }
 
   let pendingRoute = null;
@@ -435,7 +465,7 @@
   // ---------- log screen ----------
   const fmtTime = (d) => d.toLocaleTimeString([], { hour12: false });
   function renderLog() {
-    $('#log-sub').textContent = `${log.length} call${log.length === 1 ? '' : 's'} this session · session id: ${state.sessionId || 'none issued'}`;
+    $('#log-sub').innerHTML = `${log.length} call${log.length === 1 ? '' : 's'} this session · session id: ${esc(state.sessionId || 'none issued')}<br>${esc(compassSummary())}`;
     $('#log-list').innerHTML = log.map((e) => `
       <li class="log-item ${e.ok === false ? 'is-err' : ''}">
         <details>
@@ -794,7 +824,14 @@
     const ahead = what.ahead;
     let aheadHtml = '';
     if (state.heading == null) {
-      aheadHtml = `<p class="warn">No compass heading. ${compass.needsPermission ? 'Tap “Enable compass”.' : 'On desktop, add ?heading= to the URL or use the ← → keys.'} Showing everything nearby.</p>`;
+      const why = compass.permission === 'denied'
+        ? 'Motion access was declined. Close and reopen the app to be asked again.'
+        : compass.on
+          ? 'Waiting for the compass. If this stays, check Settings → Privacy → Location Services → System Services → Compass Calibration, and see Log for details.'
+          : compass.needsPermission
+            ? 'Tap anywhere to allow motion access.'
+            : 'On desktop, add ?heading= to the URL or use the ← → keys.';
+      aheadHtml = `<p class="warn">No compass heading. ${why} Showing everything nearby.</p>`;
     } else if (ahead?.error) {
       aheadHtml = `<p class="err">get_location: ${esc(ahead.error)}</p>`;
     } else if (ahead) {
@@ -857,7 +894,14 @@
   $('#btn-close').addEventListener('click', closePanel);
   $('#btn-expand').addEventListener('click', () => $('#panel').classList.toggle('expanded'));
   $('#btn-raw').addEventListener('click', () => setRawOpen(!state.rawOpen));
-  $('#btn-compass').addEventListener('click', () => enableCompass());
+  // iOS only grants motion access from a tap: ask on the first tap anywhere.
+  if (compass.needsPermission) {
+    const askOnce = () => {
+      if (compass.on || sim.heading || compass.permission === 'denied') return document.removeEventListener('click', askOnce, true);
+      enableCompass();
+    };
+    document.addEventListener('click', askOnce, true);
+  }
 
   $('#go-form').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -911,7 +955,12 @@
   });
   $('#btn-log-close').addEventListener('click', () => ($('#log-screen').hidden = true));
   $('#btn-log-copy').addEventListener('click', () =>
-    copyText(JSON.stringify(log.map((e) => ({ time: e.time.toISOString(), tool: e.tool, pos: e.pos, accuracy: e.accuracy, simulated: e.simulated, ms: e.ms, proxyMs: e.zephrMs, ok: e.ok, error: e.error, raw: e.raw })), null, 2))
+    copyText(JSON.stringify({
+      userAgent: navigator.userAgent,
+      standalone: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true,
+      compass: { permission: compass.permission, on: compass.on, counts: compass.counts, last: compass.last, heading: state.heading },
+      calls: log.map((e) => ({ time: e.time.toISOString(), tool: e.tool, pos: e.pos, accuracy: e.accuracy, simulated: e.simulated, ms: e.ms, proxyMs: e.zephrMs, ok: e.ok, error: e.error, raw: e.raw })),
+    }, null, 2))
   );
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !$('#log-screen').hidden) $('#log-screen').hidden = true;

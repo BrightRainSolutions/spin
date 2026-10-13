@@ -16,4 +16,3 @@
   [headers.values]
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(self), accelerometer=(self), gyroscope=(self), magnetometer=(self)"

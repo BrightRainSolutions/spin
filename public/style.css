@@ -81,7 +81,6 @@ button { font: inherit; }
 }
 .status .chip { color: var(--bar-ink); }
 .status .chip-ink { background: var(--bar-ink); color: var(--bar); border-color: var(--bar-ink); }
-#btn-compass { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .chip-icon { width: 40px; padding: 0; }
 
 /* ---------- map ---------- */
@@ -106,15 +105,14 @@ button { font: inherit; }
 }
 .pin-shape span { transform: rotate(45deg); font: 700 .8rem/1 var(--display); }
 .pin.dim { opacity: .3; }
-.sim-me {
-  width: 22px; height: 22px; border-radius: 50%; background: var(--route); border: 3px solid #fff;
-  box-shadow: 0 0 0 6px rgba(31, 59, 255, .2);
-  position: relative;
-}
-.sim-arrow { display: none; }
-.sim-me.has-heading .sim-arrow {
-  display: block; position: absolute; left: 50%; top: -16px; transform: translateX(-50%);
-  border: 8px solid transparent; border-bottom: 12px solid var(--route); border-top: 0;
+/* Our position marker: a heading arrow, plus a dot when the position is simulated. */
+.me { width: 22px; height: 22px; position: relative; pointer-events: none; }
+.me-sim { border-radius: 50%; background: var(--route); border: 3px solid #fff; box-shadow: 0 0 0 6px rgba(31, 59, 255, .2); }
+.me-arrow { display: none; }
+.me.has-heading .me-arrow {
+  display: block; position: absolute; left: 50%; top: -17px; transform: translateX(-50%);
+  border: 9px solid transparent; border-bottom: 14px solid var(--route); border-top: 0;
+  filter: drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1.5px #fff);
 }
 
 /* ---------- panel ---------- */

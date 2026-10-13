@@ -138,7 +138,7 @@
   // ---------- status bar ----------
   function renderStatus() {
     const acc = $('#stat-acc');
-    if (!state.pos) acc.textContent = '± — m';
+    if (!state.pos) acc.textContent = tracking ? 'locating…' : 'tap to locate';
     else if (sim.pos) acc.textContent = 'pos sim';
     else acc.textContent = `± ${Math.round(state.pos.accuracy)} m`;
     acc.classList.toggle('stat-warn', !!state.pos && !sim.pos && state.pos.accuracy > 30);
@@ -155,7 +155,7 @@
     if (firstFix && map) map.jumpTo({ center: [lng, lat], zoom: 17 });
     firstFix = false;
     while (posWaiters.length) posWaiters.shift()(state.pos);
-    updateMeMarker();
+    updateSimMarker();
     onMoved();
   }
   function whenPos() {
@@ -172,13 +172,11 @@
   }
 
   // ---------- heading ----------
+  // The app only listens. On iOS, Mapbox's GeolocateControl asks for motion permission
+  // when location tracking starts from a tap; once granted, these listeners get events too.
   const compass = {
-    on: false,
-    pending: null,
-    supported: typeof window.DeviceOrientationEvent !== 'undefined',
     needsPermission: typeof window.DeviceOrientationEvent?.requestPermission === 'function',
     // Diagnostics, shown on the Log screen.
-    permission: typeof window.DeviceOrientationEvent?.requestPermission === 'function' ? 'not asked' : 'not needed',
     counts: { deviceorientation: 0, deviceorientationabsolute: 0 },
     last: null,
   };
@@ -194,37 +192,13 @@
     if (h == null || Number.isNaN(h)) return;
     setHeading(h);
   }
-  // On iOS this must run inside a tap (no await before it); a first tap anywhere calls it.
-  function enableCompass() {
-    if (compass.on || sim.heading || !compass.supported) return Promise.resolve(compass.on || sim.heading);
-    if (compass.pending) return compass.pending;
-    const attach = () => {
-      window.addEventListener('deviceorientation', onOrientation);
-      if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', onOrientation);
-      compass.on = true;
-      renderStatus();
-      return true;
-    };
-    if (!compass.needsPermission) return Promise.resolve(attach());
-    compass.pending = DeviceOrientationEvent.requestPermission()
-      .then((r) => {
-        compass.permission = r;
-        if (r === 'granted') return attach();
-        toast('Compass blocked. Close and reopen the app to be asked again.');
-        return false;
-      })
-      .catch((err) => {
-        compass.permission = `error: ${err.message}`;
-        return false;
-      })
-      .finally(() => (compass.pending = null));
-    return compass.pending;
-  }
+  window.addEventListener('deviceorientation', onOrientation);
+  if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', onOrientation);
   function compassSummary() {
     const c = compass.counts;
     const l = compass.last;
     const fmt = (v) => (typeof v === 'number' ? Math.round(v * 10) / 10 : String(v));
-    return `Compass: permission ${compass.permission} · events ${c.deviceorientation} orientation, ${c.deviceorientationabsolute} absolute` +
+    return `Compass: events ${c.deviceorientation} orientation, ${c.deviceorientationabsolute} absolute` +
       (l ? ` · last ${l.type}: compassHeading ${fmt(l.webkitCompassHeading)}, accuracy ${fmt(l.webkitCompassAccuracy)}, alpha ${fmt(l.alpha)}, absolute ${l.absolute}` : '');
   }
   let headingFrame = 0;
@@ -234,15 +208,27 @@
     headingFrame = requestAnimationFrame(() => {
       headingFrame = 0;
       renderStatus();
-      updateMeMarker();
+      updateSimMarker();
       if (state.mode === 'what') onWhatHeading();
     });
   }
 
   // ---------- map ----------
   let map = null;
-  let meMarker = null;
+  let geolocate = null;
+  let tracking = false;
+  let simMarker = null;
   const markers = [];
+
+  // Start Mapbox location tracking from inside a tap, so its iOS motion-permission request
+  // (and with it the heading arrow) is allowed. Taps on the locate button itself are left
+  // to Mapbox, or this would toggle tracking twice.
+  function startTracking(e) {
+    if (tracking || !geolocate || e.target.closest('.mapboxgl-ctrl-geolocate')) return;
+    tracking = geolocate.trigger();
+    renderStatus();
+  }
+  document.addEventListener('click', startTracking, true);
 
   async function initMap() {
     let token = null;
@@ -265,17 +251,17 @@
       attributionControl: true,
     });
     if (!sim.pos) {
-      // showUserHeading is off: Mapbox asks iOS for motion permission when trigger() runs,
-      // which isn't a tap, so iOS refuses and its arrow never appears. We draw our own.
-      const geolocate = new mapboxgl.GeolocateControl({
+      geolocate = new mapboxgl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
         trackUserLocation: true,
-        showUserHeading: false,
+        showUserHeading: true,
       });
       map.addControl(geolocate, 'top-right');
       geolocate.on('geolocate', (e) => setPosition(e.coords.latitude, e.coords.longitude, e.coords.accuracy));
       geolocate.on('error', (e) => toast(`Location: ${e.message || 'unavailable'}`));
-      map.on('load', () => geolocate.trigger());
+      geolocate.on('trackuserlocationstart', () => (tracking = true));
+      // No trigger() on load: Mapbox asks iOS for motion permission when tracking starts,
+      // and iOS only allows that from a tap. The first tap starts it (see startTracking).
     }
     map.on('load', () => {
       map.addSource('route', { type: 'geojson', data: emptyFC() });
@@ -284,7 +270,7 @@
       map.addSource('wedge', { type: 'geojson', data: emptyFC() });
       map.addLayer({ id: 'wedge', type: 'fill', source: 'wedge', paint: { 'fill-color': '#ff4a1c', 'fill-opacity': 0.18 } });
       map.addLayer({ id: 'wedge-edge', type: 'line', source: 'wedge', paint: { 'line-color': '#ff4a1c', 'line-width': 2, 'line-opacity': 0.7 } });
-      updateMeMarker();
+      updateSimMarker();
       if (pendingRoute) setRoute(pendingRoute);
     });
     if (sim.pos) {
@@ -299,19 +285,18 @@
   }
   const emptyFC = () => ({ type: 'FeatureCollection', features: [] });
 
-  // Our own position marker. Simulated: dot + heading arrow. Live: arrow only, drawn
-  // over Mapbox's dot and accuracy circle.
-  function updateMeMarker() {
-    if (!map || !state.pos) return;
-    if (!meMarker) {
+  // Simulated position only (desktop testing); live position is Mapbox's GeolocateControl.
+  function updateSimMarker() {
+    if (!map || !sim.pos || !state.pos) return;
+    if (!simMarker) {
       const el = document.createElement('div');
-      el.className = sim.pos ? 'me me-sim' : 'me';
-      el.innerHTML = '<span class="me-arrow"></span>';
-      meMarker = new mapboxgl.Marker({ element: el, rotationAlignment: 'map' }).setLngLat([state.pos.lng, state.pos.lat]).addTo(map);
+      el.className = 'sim-me';
+      el.innerHTML = '<span class="sim-arrow"></span>';
+      simMarker = new mapboxgl.Marker({ element: el, rotationAlignment: 'map' }).setLngLat([state.pos.lng, state.pos.lat]).addTo(map);
     }
-    meMarker.setLngLat([state.pos.lng, state.pos.lat]);
-    meMarker.getElement().classList.toggle('has-heading', state.heading != null);
-    meMarker.setRotation(state.heading ?? 0);
+    simMarker.setLngLat([state.pos.lng, state.pos.lat]);
+    simMarker.getElement().classList.toggle('has-heading', state.heading != null);
+    simMarker.setRotation(state.heading ?? 0);
   }
 
   let pendingRoute = null;
@@ -716,10 +701,8 @@
   }
 
   async function runWhat() {
-    const compassReady = enableCompass(); // first, while still inside the tap
     openMode('what');
     whatView().innerHTML = '<p class="hint">Waiting for location…</p>';
-    await compassReady;
     await whenPos();
     what.detail = null;
     centerOnUser(16.5); // shows the whole 250 m cone above the panel
@@ -824,13 +807,9 @@
     const ahead = what.ahead;
     let aheadHtml = '';
     if (state.heading == null) {
-      const why = compass.permission === 'denied'
-        ? 'Motion access was declined. Close and reopen the app to be asked again.'
-        : compass.on
-          ? 'Waiting for the compass. If this stays, check Settings → Privacy → Location Services → System Services → Compass Calibration, and see Log for details.'
-          : compass.needsPermission
-            ? 'Tap anywhere to allow motion access.'
-            : 'On desktop, add ?heading= to the URL or use the ← → keys.';
+      const why = compass.needsPermission
+        ? 'Allow motion access when asked. If you declined, close and reopen the app. Log shows compass details.'
+        : 'On desktop, add ?heading= to the URL or use the ← → keys.';
       aheadHtml = `<p class="warn">No compass heading. ${why} Showing everything nearby.</p>`;
     } else if (ahead?.error) {
       aheadHtml = `<p class="err">get_location: ${esc(ahead.error)}</p>`;
@@ -894,14 +873,6 @@
   $('#btn-close').addEventListener('click', closePanel);
   $('#btn-expand').addEventListener('click', () => $('#panel').classList.toggle('expanded'));
   $('#btn-raw').addEventListener('click', () => setRawOpen(!state.rawOpen));
-  // iOS only grants motion access from a tap: ask on the first tap anywhere.
-  if (compass.needsPermission) {
-    const askOnce = () => {
-      if (compass.on || sim.heading || compass.permission === 'denied') return document.removeEventListener('click', askOnce, true);
-      enableCompass();
-    };
-    document.addEventListener('click', askOnce, true);
-  }
 
   $('#go-form').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -958,7 +929,7 @@
     copyText(JSON.stringify({
       userAgent: navigator.userAgent,
       standalone: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true,
-      compass: { permission: compass.permission, on: compass.on, counts: compass.counts, last: compass.last, heading: state.heading },
+      compass: { tracking, counts: compass.counts, last: compass.last, heading: state.heading },
       calls: log.map((e) => ({ time: e.time.toISOString(), tool: e.tool, pos: e.pos, accuracy: e.accuracy, simulated: e.simulated, ms: e.ms, proxyMs: e.zephrMs, ok: e.ok, error: e.error, raw: e.raw })),
     }, null, 2))
   );
@@ -976,7 +947,6 @@
   });
 
   // ---------- boot ----------
-  if (compass.supported && !compass.needsPermission && !sim.heading) enableCompass();
   renderStatus();
   initMap();
   if ('serviceWorker' in navigator) {
